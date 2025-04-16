@@ -138,7 +138,7 @@ const App = ({}) => {
         camera={{ fov: INITIAL_FOV, position: [0, 0.8, 7.5] }} // Use INITIAL_FOV directly
         flat
       >
-        <color attach="background" args={["#000000"]} />
+        {/* <color attach="background" args={["#000000"]} /> */}
         {/* <fog attach="fog" args={["#000000", 0, 20]} /> */}
         <FarPlanets />
         <InnerScene
