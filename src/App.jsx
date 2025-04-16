@@ -18,7 +18,8 @@ import {
   Billboard,
   Bounds,
   Float, // Import Bounds
-  useHelper, // Import useHelper
+  useHelper,
+  useTexture, // Import useHelper
 } from "@react-three/drei";
 // Import BoxHelper from three
 import { BoxHelper } from "three";
@@ -33,11 +34,10 @@ import { useRoute, useLocation } from "wouter";
 import getUuid from "uuid-by-string";
 
 import { AccumulativeShadows, RandomizedLight } from "@react-three/drei";
-import { Kreaton } from "./Kreaton_A";
-import { Armchair } from "./Armchair";
-import { ProjectPlane } from "./Projekte-2";
+
 import Frames from "./Frames";
 import ExtrudedSVG from "./ExtrudedSVG"; // Import the new component
+import { Vector3, Vector2, MathUtils } from "three";
 
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -75,20 +75,58 @@ const img = isDevelopment ? localimages : remoteImages;
 
 console.log(`Loading model from: ${img}`); // Log which URL is being used
 
+function Rig({ children }) {
+  const ref = useRef();
+  const vec = new Vector3();
+  const { camera } = useThree();
+  const mouse = new Vector2();
+  window.addEventListener("mousemove", (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  useFrame(() => {
+    camera.position.lerp(vec.set(mouse.x * 2, 1, 7), 0.01);
+    ref.current.position.lerp(vec.set(mouse.x * 0.1, mouse.y * 0.1, 0), 0.1);
+
+    camera.lookAt(ref.current.position);
+    // ref.current.rotation.y = MathUtils.lerp(
+    //   ref.current.rotation.y,
+    //   (mouse.x * Math.PI) / 10,
+    //   0.1
+    // );
+  });
+  return <group ref={ref}>{children}</group>;
+}
+
 const App = ({}) => {
   const innerSceneRef = useRef();
   const projectTextRef = useRef();
   const headingRef = useRef(); // Create ref for Heading
 
-  // use getApiData to fetch images
+  // use getApiData to fetch images and svgUrl
   const [images, setImages] = useState([]);
+  const [svgUrl, setSvgUrl] = useState(null); // Add state for SVG URL
+  const defaultSvgUrl =
+    "https://cdn.prod.website-files.com/678907d8717d9b914d9d4b48/67c04ac57662945f0bfed7cc_Linea_D.svg"; // Define default SVG URL
+
   useEffect(() => {
-    const fetchImages = async () => {
-      const data = await getApiData();
-      setImages(data);
+    const fetchData = async () => {
+      const data = await getApiData(); // Expects { images: [], svgUrl: '...' }
+      if (data) {
+        setImages(data.images || []); // Set images, default to empty array
+        // Set SVG URL: use fetched URL if available, otherwise use default
+        const finalSvgUrl = data.svgUrl || defaultSvgUrl;
+        setSvgUrl(finalSvgUrl);
+        console.log("Fetched SVG URL:", data.svgUrl, "| Using:", finalSvgUrl);
+      } else {
+        // If data fetch failed or returned nothing, use default SVG
+        setSvgUrl(defaultSvgUrl);
+        console.log("No data fetched, using default SVG URL:", defaultSvgUrl);
+      }
     };
-    fetchImages();
-  }, []);
+    fetchData();
+  }, []); // Dependency array remains empty to fetch once on mount
   console.log("Images:", images);
 
   return (
@@ -101,10 +139,11 @@ const App = ({}) => {
         flat
       >
         <color attach="background" args={["#000000"]} />
-        <fog attach="fog" args={["#000000", 0, 20]} />
-
+        {/* <fog attach="fog" args={["#000000", 0, 20]} /> */}
+        <FarPlanets />
         <InnerScene
           images={images}
+          svgUrl={svgUrl} // Pass svgUrl down
           ref={innerSceneRef}
           // Pass down section 2 camera targets
           section2Position={section2Position}
@@ -118,6 +157,7 @@ const App = ({}) => {
           <Vignette eskil={false} offset={0.1} darkness={1.1} />
           <Bloom mipmapBlur luminanceThreshold={1} intensity={1} />
         </EffectComposer>
+        <Rig />
         {/* </Resize> */}
       </Canvas>
     </>
@@ -178,18 +218,20 @@ const AnimatedMoon = ({ position, rotation, scale }) => {
   );
 };
 
-// Pass props down to Frames
+// Pass props down to Frames and accept svgUrl
 const InnerScene = ({
   images,
+  svgUrl, // Accept svgUrl prop
   setIsZoomed,
   section2Position,
   section2LookAtTarget,
   initialFov, // Receive initialFov
 }) => {
   // SVG URL - Using the direct link to the SVG file
-  const svgUrl =
-    // "https://cdn.prod.website-files.com/678907d8717d9b914d9d4b48/67c04ac5baaf44a1bd8eb8e9_Jadestein.svg";
-    "https://cdn.prod.website-files.com/678907d8717d9b914d9d4b48/67c04ac5765ce10bca8db9d0_LafeeDor.svg";
+  // const svgUrl =
+  //   // "https://cdn.prod.website-files.com/678907d8717d9b914d9d4b48/67c04ac5baaf44a1bd8eb8e9_Jadestein.svg";
+  //   // "https://cdn.prod.website-files.com/678907d8717d9b914d9d4b48/67c04ac5765ce10bca8db9d0_LafeeDor.svg";
+  //   "https://cdn.prod.website-files.com/678907d8717d9b914d9d4b48/67c04ac57662945f0bfed7cc_Linea_D.svg";
 
   // Create a ref for the group containing the SVG
   const svgGroupRef = useRef();
@@ -245,29 +287,43 @@ const InnerScene = ({
             rotation={[Math.PI, 0, 0]}
             position={[0, 0, 0]}
           >
-            <ExtrudedSVG
-              url={svgUrl}
-              targetHeight={1.5}
-              depth={20}
-              // scale={0.005} // Adjust scale to fit your needs
-              position={[0, 0, 0]} // Position inside Float is relative to Float's origin
-              // rotation={[Math.PI, 0, 0]} // Rotate to face the camera
-              // Note: Rotation is in radians
-              // Position inside Float is relative to Float's origin
-            />
+            {/* Conditionally render ExtrudedSVG only if svgUrl is available */}
+            {svgUrl && (
+              <ExtrudedSVG
+                url={svgUrl} // Use the svgUrl prop
+                targetHeight={1.5}
+                depth={20}
+                position={[0, 0, 0]}
+              />
+            )}
           </group>
         </Float>
       </group>
       <ContactShadows
         frames={1}
         opacity={1}
-        scale={10}
-        blur={1}
+        scale={20}
+        blur={0.5}
         far={10}
-        position={[0, -0.6, 0]}
+        position={[0, -1, 0]}
         resolution={256}
         color="#000000"
       />
+    </group>
+  );
+};
+
+const FarPlanets = () => {
+  // Load the texture
+  const texture = useTexture("/moonTextur.jpg");
+
+  return (
+    <group>
+      <mesh position={[50, 30, -200]}>
+        <sphereGeometry args={[10, 32, 32]} />
+        {/* Apply the texture to the map property */}
+        <meshStandardMaterial map={texture} />
+      </mesh>
     </group>
   );
 };

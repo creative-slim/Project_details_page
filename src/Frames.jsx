@@ -307,63 +307,7 @@ function Frame({ url, c = new THREE.Color(), ...props }) {
           position={[0, 0, 0.7]}
           url={url}
         />
-
-        {/* Add onClick handler to this group */}
-        {/* <group ref={linkRef} position={[0, -0.01, 0]} onClick={handleLinkClick}>
-          <mesh position={[0, -0.43, 0.8]} scale={[0.95, 0.08, 1]}>
-            <planeGeometry args={[1, 1, 1, 1]} />
-            <meshBasicMaterial
-              color="#121124"
-              opacity={1}
-              raycast={() => null}
-            />
-          </mesh>
-          <group
-            position={[0, -0.43, 0.7]}
-            scale={[1, 1, 1]}
-            raycast={() => null}
-          >
-            <Text
-              fontSize={0.04}
-              anchorX="left"
-              position={[-0.45, 0, 0.2]}
-              material-toneMapped={false}
-              raycast={() => null} // Make text non-interactive if needed
-            >
-              {props.name?.split("-").join(" ") || name.split("-").join(" ")}
-            </Text>
-            <Text
-              fontSize={0.04}
-              anchorX="right"
-              position={[0.4, 0, 0.2]}
-              material-toneMapped={false}
-              raycast={() => null} // Make text non-interactive if needed
-            >
-              DETAILS
-            </Text>
-            <Text
-              fontSize={0.04}
-              anchorX="right"
-              position={[0.45, 0.01, 0.2]}
-              material-toneMapped={false}
-              raycast={() => null} // Make text non-interactive if needed
-              fontStyle="uppercase"
-              rotation={[0, 0, Math.PI / 4]} // Rotate 45 degrees around Z-axis
-            >
-              ➜
-            </Text>
-          </group>
-        </group> */}
       </mesh>
-      <Text
-        maxWidth={0.1}
-        anchorX="left"
-        anchorY="top"
-        position={[0.55, GOLDENRATIO, 0]}
-        fontSize={0.03}
-      >
-        {props.name?.split("-").join(" ") || name.split("-").join(" ")}
-      </Text>
     </group>
   );
 }
