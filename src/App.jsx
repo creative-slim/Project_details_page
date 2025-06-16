@@ -23,7 +23,7 @@ import {
 } from "@react-three/drei";
 // Import BoxHelper from three
 import { BoxHelper } from "three";
-
+import AnimatedStars from "./AnimatedStars";
 import {
   EffectComposer,
   Bloom,
@@ -65,11 +65,11 @@ const localimages = {
 };
 const remoteImages = {
   color:
-    "https://files.creative-directors.com/creative-website/creative25/scenes_imgs/terrain_color_4x_blobby.jpg",
+    "https://files.creative-directors.com/creative-website/creative25/scenes_imgs/terrain_color_4x_blobby.webp",
   normal:
-    "https://files.creative-directors.com/creative-website/creative25/scenes_imgs/terrain_normal_4x_blobby.jpg",
+    "https://files.creative-directors.com/creative-website/creative25/scenes_imgs/terrain_normal_4x_blobby.webp",
   height:
-    "https://files.creative-directors.com/creative-website/creative25/scenes_imgs/terrain_height_4x_blobby.jpg",
+    "https://files.creative-directors.com/creative-website/creative25/scenes_imgs/terrain_height_4x_blobby.webp",
 };
 const img = isDevelopment ? localimages : remoteImages;
 
@@ -99,7 +99,7 @@ function Rig({ children }) {
   return <group ref={ref}>{children}</group>;
 }
 
-const App = ({}) => {
+const App = ({ }) => {
   const innerSceneRef = useRef();
   const projectTextRef = useRef();
   const headingRef = useRef(); // Create ref for Heading
@@ -190,8 +190,9 @@ const AnimatedMoon = ({ position, rotation, scale }) => {
     if (materialRef.current) {
       // Oscillate between purple (270) and blue (240) hues
       const time = state.clock.getElapsedTime();
-      const hue = 230 + Math.sin(time * 0.2) * 25; // Oscillate between ~225 and ~255
-      materialRef.current.color = new THREE.Color(`hsl(${hue}, 70%, 50%)`);
+      // const hue = 200 + Math.sin(time * 0.2) * 1; // Oscillate between ~225 and ~255
+      const hue = 150;
+      materialRef.current.color = new THREE.Color(`hsl(${hue}, 70%, 80%)`);
     }
   });
 
@@ -242,7 +243,7 @@ const InnerScene = ({
 
   return (
     <group name="innerScene">
-      <Stars />
+      <AnimatedStars />
       <ambientLight intensity={1} />
       <pointLight
         position={[0, 3, 3]}
@@ -315,13 +316,32 @@ const InnerScene = ({
 
 const FarPlanets = () => {
   // Load the texture
-  const texture = useTexture("/moonTextur.jpg");
+  const texture = useTexture("/moonTextur_Small.jpeg");
+  const meshRef = useRef();
+  const time = useRef(0);
+
+  useFrame((state, delta) => {
+    if (meshRef.current) {
+      let speedMultiplier = 1;
+      if (meshRef.current.position.y <= -15) {
+        speedMultiplier = 4;
+      }
+      time.current += delta * speedMultiplier;
+
+      // Create oval movement
+      // x: 50 + larger oscillation (long part of oval)
+      // y: 30 + small oscillation (short part of oval)
+      // z: -200 (fixed)
+      meshRef.current.position.x = 0 + Math.cos(time.current * 0.2) * 150; // Larger horizontal movement
+      meshRef.current.position.y = -35 + Math.sin(time.current * 0.2) * 80; // Small vertical movement
+      meshRef.current.position.z = -200;
+    }
+  });
 
   return (
     <group>
-      <mesh position={[50, 30, -200]}>
+      <mesh ref={meshRef} position={[50, 30, -200]}>
         <sphereGeometry args={[10, 32, 32]} />
-        {/* Apply the texture to the map property */}
         <meshStandardMaterial map={texture} />
       </mesh>
     </group>

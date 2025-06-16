@@ -62,6 +62,7 @@ export default function Frames({
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // State for zoom-out animation
   const targetFovRef = useRef(initialFov); // Ref to store target FOV
 
+  const pointLightRef = useRef(); // Ref for point light
   // Refs for animation targets
   const finalZoomInPosition = useRef(new THREE.Vector3());
   const frameCenterWorld = useRef(new THREE.Vector3()); // Point to look at
@@ -149,6 +150,13 @@ export default function Frames({
       state.camera.updateProjectionMatrix(); // Update projection matrix if FOV changed
     }
 
+    // pointLight animation
+    if (pointLightRef.current) {
+      // make the pointLIght rotate
+      pointLightRef.current.position.z = Math.sin(state.clock.elapsedTime) * 2;
+      pointLightRef.current.position.x = Math.cos(state.clock.elapsedTime) * 4;
+      // pointLightRef.current.position.y = Math.sin(state.clock.elapsedTime);
+    }
     if (isAnimatingOut) {
       // During zoom-out animation, smoothly rotate towards the target quaternion using dampQ
       easing.dampQ(state.camera.quaternion, zoomOutTargetQ.current, 0.5, dt); // Adjust speed (0.5) as needed
@@ -208,6 +216,7 @@ export default function Frames({
         triggerZoomOut(); // Will only run if params.id exists and not already animating
       }}
     >
+      <pointLight ref={pointLightRef} position={[0, 1, 0]} intensity={5} />
       {images.map(
         (props) => <Frame key={props.url} {...props} /> /* prettier-ignore */
       )}
@@ -287,9 +296,9 @@ function Frame({ url, c = new THREE.Color(), ...props }) {
       >
         <boxGeometry />
         <meshStandardMaterial
-          color="#151515"
-          metalness={0.5}
-          roughness={0.5}
+          color={new THREE.Color("gold")}
+          metalness={0.9}
+          roughness={0.2}
           envMapIntensity={2}
         />
         <mesh
