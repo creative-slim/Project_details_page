@@ -26,6 +26,7 @@ import getUuid from "uuid-by-string";
 
 import { AccumulativeShadows, RandomizedLight } from "@react-three/drei";
 import { gsap } from "gsap"; // Import gsap
+import { Frame } from "./components/Frame";
 
 const GOLDENRATIO = 1.61803398875;
 
@@ -220,103 +221,6 @@ export default function Frames({
       {images.map(
         (props) => <Frame key={props.url} {...props} /> /* prettier-ignore */
       )}
-    </group>
-  );
-}
-
-function Frame({ url, c = new THREE.Color(), ...props }) {
-  const image = useRef();
-  const frame = useRef();
-  const linkRef = useRef();
-  const [, params] = useRoute("/item/:id");
-  const [hovered, hover] = useState(false);
-  const [rnd] = useState(() => Math.random());
-  const name = getUuid(url);
-  const isActive = params?.id === name;
-  useCursor(hovered);
-  useFrame((state, dt) => {
-    image.current.material.zoom =
-      2 + Math.sin(rnd * 10000 + state.clock.elapsedTime / 3) / 2;
-    easing.damp3(
-      image.current.scale,
-      [
-        0.85 * (!isActive && hovered ? 0.85 : 1),
-        0.9 * (!isActive && hovered ? 0.905 : 1),
-        1,
-      ],
-      0.1,
-      dt
-    );
-    easing.dampC(
-      frame.current.material.color,
-      hovered ? "orange" : "white",
-      0.1,
-      dt
-    );
-  });
-
-  const handleLinkClick = (e) => {
-    // e.stopPropagation(); // Keep commented out if the parent group click should still function
-    console.log("Frame clicked, handling link logic:", props);
-    if (props.slug) {
-      const targetSelector = `[data-projects="${props.slug}"]`;
-      const targetElement = document.querySelector(targetSelector);
-
-      if (targetElement) {
-        console.log("Found target element:", targetElement);
-
-        // Remove 'active' class from all elements with data-projects attribute
-        const allProjectElements = document.querySelectorAll("[data-projects]");
-        allProjectElements.forEach((el) => {
-          el.classList.remove("active");
-        });
-
-        // Add 'active' class to the clicked element
-        targetElement.classList.add("active");
-
-        // Optional: Scroll to the target element
-        // targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        console.warn(`Element with data-projects="${props.slug}" not found.`);
-      }
-    } else {
-      console.warn("Slug prop is missing from Frame component.");
-    }
-  };
-
-  return (
-    <group {...props}>
-      <mesh
-        name={name}
-        onPointerOver={(e) => (e.stopPropagation(), hover(true))}
-        onPointerOut={() => hover(false)}
-        scale={[1, GOLDENRATIO, 0.05]}
-        position={[0, GOLDENRATIO / 2, 0]}
-        onClick={handleLinkClick} // This mesh triggers the function
-      >
-        <boxGeometry />
-        <meshStandardMaterial
-          color={new THREE.Color("gold")}
-          metalness={0.9}
-          roughness={0.2}
-          envMapIntensity={2}
-        />
-        <mesh
-          ref={frame}
-          raycast={() => null}
-          scale={[0.9, 0.93, 0.9]}
-          position={[0, 0, 0.2]}
-        >
-          <boxGeometry />
-          <meshBasicMaterial toneMapped={false} fog={false} />
-        </mesh>
-        <Image
-          raycast={() => null}
-          ref={image}
-          position={[0, 0, 0.7]}
-          url={url}
-        />
-      </mesh>
     </group>
   );
 }
