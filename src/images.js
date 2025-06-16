@@ -107,7 +107,7 @@ const getApiData = async () => {
 
   const projectName = projectData.name || "Default Project";
   const projectSlug = projectData.slug || "default-slug";
-  const projectSvgUrl = isValidSvgUrl(projectData.svg) ? projectData.svg : null;
+  const projectSvgUrl = isValidSvgUrl(projectData.svg.url) ? projectData.svg.url : null;
 
   console.log(`Using data for project: ${projectName} (${projectSlug}), SVG: ${projectSvgUrl}`);
 
