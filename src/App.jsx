@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { AdaptiveDpr, OrbitControls, Environment } from "@react-three/drei";
 import {
   EffectComposer,
   Bloom,
@@ -24,6 +24,7 @@ const section2Position = new THREE.Vector3(0, 0.8, 7.5);
 const section2LookAtTarget = new THREE.Vector3(0, 0, -5);
 
 const isDevelopment = import.meta.env.DEV;
+
 const localimages = {
   color: "/terrain_color_4x_blobby.jpg",
   normal: "/terrain_normal_4x_blobby.jpg",
@@ -40,6 +41,7 @@ const remoteImages = {
   moonTexture:
     "https://files.creative-directors.com/creative-website/creative25/scenes_imgs/moonTextur_Small.jpeg",
 };
+
 const img = isDevelopment ? localimages : remoteImages;
 
 console.log(`Loading model from: ${img}`);
@@ -71,12 +73,17 @@ const App = () => {
   return (
     <>
       <Canvas
-        shadows
-        dpr={[1, 1.5]}
+        // shadows
+        dpr={1}
         gl={{ antialias: true }}
         camera={{ fov: INITIAL_FOV, position: [0, 0.8, 7.5] }}
         flat
       >
+        <Environment preset="city" background={false} />
+        {/* <Perf /> */}
+        <AdaptiveDpr pixelated />
+
+
         <FarPlanets img={img} />
         <InnerScene
           images={images}
@@ -86,7 +93,7 @@ const App = () => {
           initialFov={INITIAL_FOV}
           img={img}
         />
-        {/* <OrbitControls /> */}
+        <OrbitControls />
         <EffectComposer>
           <Vignette eskil={false} offset={0.1} darkness={1.1} />
           <Bloom mipmapBlur luminanceThreshold={1} intensity={1} />
