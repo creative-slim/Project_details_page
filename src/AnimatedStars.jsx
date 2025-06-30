@@ -1,8 +1,8 @@
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Stars } from "@react-three/drei";
 
-export default function AnimatedStars(props) {
+const AnimatedStars = (props) => {
     const starsRef = useRef();
     useFrame((state, delta) => {
         if (starsRef.current) {
@@ -15,4 +15,6 @@ export default function AnimatedStars(props) {
             <Stars {...props} />
         </group>
     );
-} 
+};
+
+export default memo(AnimatedStars); 

@@ -1,12 +1,12 @@
 import * as THREE from "three";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback, memo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useCursor, useTexture } from "@react-three/drei";
 import { useRoute } from "wouter";
 import { easing } from "maath";
 import getUuid from "uuid-by-string";
 
-export function Frame({ url, c = new THREE.Color(), ...props }) {
+const Frame = memo(function Frame({ url, c = new THREE.Color(), ...props }) {
     const texture = useTexture(url);
     const image = useRef();
     const frame = useRef();
@@ -39,12 +39,12 @@ export function Frame({ url, c = new THREE.Color(), ...props }) {
             dt
         );
     });
-    const handleLinkClick = (e) => {
+    const handleLinkClick = useCallback((e) => {
         e.stopPropagation();
         // Your click handling logic here
         console.log(`Link clicked for image: ${props.slug}`);
         window.open(`/project/${props.slug}`, "_blank");
-    };
+    }, [props.slug]);
 
     return (
         <group {...props}>
@@ -83,4 +83,6 @@ export function Frame({ url, c = new THREE.Color(), ...props }) {
             </mesh>
         </group>
     );
-} 
+});
+
+export { Frame }; 

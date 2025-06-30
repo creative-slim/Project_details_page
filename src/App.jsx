@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import { Canvas } from "@react-three/fiber";
 import { AdaptiveDpr, OrbitControls, Environment } from "@react-three/drei";
 import {
@@ -14,8 +14,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import getApiData from "./images.js";
 import ErrorBoundary from "./ErrorBoundary";
 import { Rig } from "./components/Rig.jsx";
-import { InnerScene } from "./components/InnerScene.jsx";
-import { FarPlanets } from "./components/FarPlanets.jsx";
+// Lazy load heavy components
+const InnerScene = lazy(() => import("./components/InnerScene.jsx"));
+const FarPlanets = lazy(() => import("./components/FarPlanets.jsx"));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -80,19 +81,22 @@ const App = () => {
         camera={{ fov: INITIAL_FOV, position: [0, 0.8, 7.5] }}
         flat
       >
-        <Environment preset="city" background={false} />
+        <Environment files="/hero-image-nabula.webp" background={true} />
         {/* <Perf /> */}
         <AdaptiveDpr pixelated />
-
-        <FarPlanets img={img} />
-        <InnerScene
-          images={images}
-          svgUrl={svgUrl}
-          section2Position={section2Position}
-          section2LookAtTarget={section2LookAtTarget}
-          initialFov={INITIAL_FOV}
-          img={img}
-        />
+        <Suspense fallback={null}>
+          <FarPlanets img={img} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <InnerScene
+            images={images}
+            svgUrl={svgUrl}
+            section2Position={section2Position}
+            section2LookAtTarget={section2LookAtTarget}
+            initialFov={INITIAL_FOV}
+            img={img}
+          />
+        </Suspense>
         <OrbitControls />
         <EffectComposer>
           <Vignette eskil={false} offset={0.1} darkness={1.1} />

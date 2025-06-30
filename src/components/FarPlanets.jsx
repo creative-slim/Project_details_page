@@ -1,8 +1,8 @@
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 
-export const FarPlanets = ({ img }) => {
+const FarPlanets = ({ img }) => {
     // Load the texture
     const texture = useTexture(img.moonTexture);
     const meshRef = useRef();
@@ -34,4 +34,8 @@ export const FarPlanets = ({ img }) => {
             </mesh>
         </group>
     );
-}; 
+};
+
+const MemoFarPlanets = memo(FarPlanets);
+export { FarPlanets };
+export default MemoFarPlanets; 
