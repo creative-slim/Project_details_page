@@ -1,5 +1,4 @@
 // --- Configuration ---
-const API_URL = "https://webhook.creative-directors.com/webhook/7bd04d17-2d35-49e1-a2aa-10b5c8ee3429";
 const LAYOUT_RADIUS = 3.5; // Radius of the semi-circle for image layout
 
 // --- Helper Functions ---
@@ -87,49 +86,56 @@ const calculateSemiCircleLayout = (numImages, radius) => {
   });
 };
 
+/**
+ * Waits for the DOM to be fully loaded.
+ * @returns {Promise<void>}
+ */
+const waitForDom = () => {
+  if (document.readyState === "loading") {
+    return new Promise((resolve) => {
+      document.addEventListener("DOMContentLoaded", resolve, { once: true });
+    });
+  }
+  return Promise.resolve();
+};
+
 // --- Main Data Provider Function ---
 
 /**
- * Fetches API data, processes it based on the current URL slug,
- * and returns formatted image data and an SVG URL for the 3D scene.
+ * Fetches image and logo data from the DOM, applies layout, and returns formatted data.
  * @returns {Promise<{images: Array, svgUrl: string|null}>}
  */
 const getApiData = async () => {
-  const allProjects = await fetchProjectsData(API_URL);
+  await waitForDom();
 
-  if (!allProjects || allProjects.length === 0) {
-    console.warn("No project data found. Returning empty array and null SVG.");
-    return { images: [], svgUrl: null };
+  // Find images container
+  const imagesContainer = document.querySelector('[data-three="images"]');
+  let imageElements = [];
+  if (imagesContainer) {
+    imageElements = Array.from(imagesContainer.querySelectorAll('img'));
   }
 
-  const currentSlug = getSlugFromPathname(window.location.pathname);
-  const projectData = findProjectData(allProjects, currentSlug);
+  // Find logo
+  const logoElement = document.querySelector('[data-three="logo"]');
+  const logoUrl = logoElement && logoElement.src ? logoElement.src : null;
 
-  const projectName = projectData.name || "Default Project";
-  const projectSlug = projectData.slug || "default-slug";
-  const projectSvgUrl = isValidSvgUrl(projectData.svg.url) ? projectData.svg.url : null;
-
-  console.log(`Using data for project: ${projectName} (${projectSlug}), SVG: ${projectSvgUrl}`);
-
-  const sourceImages = (projectData.images && projectData.images.length > 0) ? projectData.images : [];
-
-  if (sourceImages.length === 0) {
-    console.warn(`No images found for project ${projectName}. Returning empty image array.`);
-    return { images: [], svgUrl: projectSvgUrl };
+  if (!imageElements.length) {
+    console.warn("No images found in DOM. Returning empty image array.");
+    return { images: [], svgUrl: logoUrl };
   }
 
-  const layout = calculateSemiCircleLayout(sourceImages.length, LAYOUT_RADIUS);
+  const layout = calculateSemiCircleLayout(imageElements.length, LAYOUT_RADIUS);
 
-  const images = sourceImages.map((imageUrl, index) => ({
+  const images = imageElements.map((img, index) => ({
     position: layout[index].position,
     rotation: layout[index].rotation,
-    url: imageUrl || "https://placehold.co/600x400",
-    name: `${projectName} ${index + 1}`,
-    slug: projectSlug,
+    url: img.src || "https://placehold.co/600x400",
+    name: img.alt || `Image ${index + 1}`,
+    slug: img.getAttribute('data-slug') || 'dom-image',
   }));
 
-  console.log("Final Images for Frames:", images);
-  return { images, svgUrl: projectSvgUrl };
+  console.log("Final Images for Frames (from DOM):", images);
+  return { images, svgUrl: logoUrl };
 };
 
 export default getApiData;

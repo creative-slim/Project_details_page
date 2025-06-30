@@ -41,17 +41,16 @@ const FlatSVG = ({ url, size = 1, flipY = true, envMapIntensity = 1, ...props })
             scale={[normalizationFactor, flipY ? -normalizationFactor : normalizationFactor, normalizationFactor]}
             {...props}
         >
-
             {shapes.map((shape, j) => (
                 <mesh key={j} position={[-bboxCenter[0], -bboxCenter[1], 0]}>
                     <shapeGeometry args={[shape]} />
                     <meshPhysicalMaterial
-                        color={"#ffffff"}
+                        color="#FFFFFF"
                         side={THREE.DoubleSide}
-                        metalness={0.8}
+                        metalness={0.1}
                         roughness={0.1}
-                        reflectivity={1}
-                        envMapIntensity={envMapIntensity}
+                        reflectivity={0.5}
+                        envMapIntensity={1}
                     />
                 </mesh>
             ))}

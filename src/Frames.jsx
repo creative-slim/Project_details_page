@@ -63,7 +63,8 @@ export default function Frames({
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // State for zoom-out animation
   const targetFovRef = useRef(initialFov); // Ref to store target FOV
 
-  const pointLightRef = useRef(); // Ref for point light
+  const pointLightRef = useRef();
+
   // Refs for animation targets
   const finalZoomInPosition = useRef(new THREE.Vector3());
   const frameCenterWorld = useRef(new THREE.Vector3()); // Point to look at
@@ -154,9 +155,10 @@ export default function Frames({
     // pointLight animation
     if (pointLightRef.current) {
       // make the pointLIght rotate
-      pointLightRef.current.position.z = Math.sin(state.clock.elapsedTime) * 2;
-      pointLightRef.current.position.x = Math.cos(state.clock.elapsedTime) * 4;
-      // pointLightRef.current.position.y = Math.sin(state.clock.elapsedTime);
+      const t = state.clock.elapsedTime;
+      pointLightRef.current.position.x = Math.cos(t) * 4;
+      pointLightRef.current.position.z = Math.sin(t) * 2;
+      // pointLightRef.current.position.y = Math.sin(t);
     }
     if (isAnimatingOut) {
       // During zoom-out animation, smoothly rotate towards the target quaternion using dampQ
@@ -217,6 +219,14 @@ export default function Frames({
         triggerZoomOut(); // Will only run if params.id exists and not already animating
       }}
     >
+      {/* SpotLight aimed at the SVG/center */}
+      <spotLight
+        position={[0, 2, 3]}
+        angle={0.4}
+        penumbra={0.5}
+        intensity={15}
+        color={0xffffff}
+      />
       <pointLight ref={pointLightRef} position={[0, 1, 0]} intensity={5} />
       {images.map(
         (props) => <Frame key={props.url} {...props} /> /* prettier-ignore */

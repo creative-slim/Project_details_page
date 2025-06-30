@@ -20,10 +20,10 @@ export const InnerScene = ({
         <Suspense fallback={null}>
             <group name="innerScene">
                 <AnimatedStars />
-                <ambientLight intensity={1} />
+                {/* <ambientLight intensity={0.1} /> */}
                 <pointLight
                     position={[0, 3, 3]}
-                    intensity={5}
+                    intensity={10}
                     color={"#ffffff"}
                     castShadow
                     shadow-mapSize={[1024, 1024]}
@@ -65,7 +65,7 @@ export const InnerScene = ({
                             position={[0, 0, 0]}
                         >
                             {typeof svgUrl === 'string' && svgUrl.length > 0 && (
-                                <FlatSVG url={svgUrl} size={2} position={[0, 0, 0]} flipY={false} envMapIntensity={0.5} />
+                                <FlatSVG url={svgUrl} size={2} position={[0, 0, 0]} flipY={false} />
                             )}
 
                             {/* <ExtrudedSVG

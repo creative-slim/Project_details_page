@@ -57,9 +57,9 @@ export function Frame({ url, c = new THREE.Color(), ...props }) {
             >
                 <boxGeometry />
                 <meshStandardMaterial
-                    color="#151515"
-                    metalness={0.5}
-                    roughness={0.5}
+                    color="#FFD700"
+                    metalness={1}
+                    roughness={0.2}
                     envMapIntensity={2}
                 />
                 <mesh

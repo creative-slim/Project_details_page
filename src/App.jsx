@@ -12,6 +12,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import getApiData from "./images.js";
+import ErrorBoundary from "./ErrorBoundary";
 import { Rig } from "./components/Rig.jsx";
 import { InnerScene } from "./components/InnerScene.jsx";
 import { FarPlanets } from "./components/FarPlanets.jsx";
@@ -71,7 +72,7 @@ const App = () => {
   console.log("Images:", images);
 
   return (
-    <>
+    <ErrorBoundary>
       <Canvas
         // shadows
         dpr={1}
@@ -82,7 +83,6 @@ const App = () => {
         <Environment preset="city" background={false} />
         {/* <Perf /> */}
         <AdaptiveDpr pixelated />
-
 
         <FarPlanets img={img} />
         <InnerScene
@@ -100,7 +100,7 @@ const App = () => {
         </EffectComposer>
         <Rig />
       </Canvas>
-    </>
+    </ErrorBoundary>
   );
 };
 
