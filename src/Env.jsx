@@ -1,5 +1,5 @@
 import { Environment, useTexture } from "@react-three/drei";
-import { EquirectangularReflectionMapping, SRGBColorSpace } from "three";
+import { EquirectangularReflectionMapping, SRGBColorSpace, Color } from "three";
 
 const isDevelopment = import.meta.env.DEV;
 const backgroundTextureLocalUrl = "/sci-fi-nebula-space-planet_4K.jpg";
@@ -14,11 +14,18 @@ const lightingTextureUrl = isDevelopment ? lightingTextureLocalUrl : lightingTex
 
 
 
-export default function Env() {
+export default function Env({ hueShift = 0, saturation = 0, brightness = 0 }) {
 
     const backgroundTexture = useTexture(backgroundTextureUrl);
     backgroundTexture.mapping = EquirectangularReflectionMapping;
     backgroundTexture.colorSpace = SRGBColorSpace;
+
+    // Apply color modifications to the texture
+    if (hueShift !== 0 || saturation !== 1 || brightness !== 1) {
+        const color = new Color();
+        color.setHSL(hueShift / 360, saturation, brightness);
+        backgroundTexture.color = color;
+    }
 
     return (
         <>

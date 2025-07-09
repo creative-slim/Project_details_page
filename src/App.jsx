@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { AdaptiveDpr, OrbitControls, Environment } from "@react-three/drei";
 import {
@@ -17,6 +17,9 @@ import { Rig } from "./components/Rig.jsx";
 import { InnerScene } from "./components/InnerScene.jsx";
 import { FarPlanets } from "./components/FarPlanets.jsx";
 import Env from "./Env.jsx";
+import LoadingManager from "./components/LoadingManager.jsx";
+// import LoadingScreen from "./components/LoadingScreen.jsx";
+// import useLoadingState from "./utils/useLoadingState.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -52,19 +55,26 @@ const App = () => {
   const [images, setImages] = useState([]);
   const [svgUrl, setSvgUrl] = useState(null);
   const defaultSvgUrl = null;
-  //  "https://cdn.prod.website-files.com/678907d8717d9b914d9d4b48/67c04ac57662945f0bfed7cc_Linea_D.svg";
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getApiData();
-      if (data) {
-        setImages(data.images || []);
-        const finalSvgUrl = data.svgUrl || defaultSvgUrl;
-        setSvgUrl(finalSvgUrl);
-        console.log("Fetched SVG URL:", data.svgUrl, "| Using:", finalSvgUrl);
-      } else {
+      console.log("🌐 Fetching API data...");
+      try {
+        const data = await getApiData();
+        if (data) {
+          setImages(data.images || []);
+          const finalSvgUrl = data.svgUrl || defaultSvgUrl;
+          setSvgUrl(finalSvgUrl);
+          console.log("✅ API data fetched successfully");
+          console.log("📊 Images to load:", data.images?.length || 0);
+          console.log("🎨 SVG URL:", data.svgUrl, "| Using:", finalSvgUrl);
+        } else {
+          setSvgUrl(defaultSvgUrl);
+          console.log("⚠️ No data fetched, using default SVG URL:", defaultSvgUrl);
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch API data:", error);
         setSvgUrl(defaultSvgUrl);
-        console.log("No data fetched, using default SVG URL:", defaultSvgUrl);
       }
     };
     fetchData();
@@ -72,38 +82,41 @@ const App = () => {
 
   console.log("Images:", images);
 
+  // Example: handle progress and completion
+  const handleProgress = (progress, assets) => {
+    // You can hook this up to your own UI or state
+    console.log("[App] Progress:", progress, assets);
+  };
+  const handleLoadComplete = () => {
+    console.log("[App] All assets loaded!");
+  };
+
   return (
     <ErrorBoundary>
       <Canvas
-        // shadows
         dpr={1}
         gl={{ antialias: true }}
         camera={{ fov: INITIAL_FOV, position: [0, 0.8, 7.5] }}
         flat
       >
-        <Env />
-        {/* <Environment preset="night" background={true} /> */}
-        {/* <Environment files="/rogland_clear_night_4k.exr" background={true} /> */}
-        {/* <Environment
-          files="/sci-fi-nebula-space-planet_2K.exr"
-          backgroundRotation={[0, Math.PI / 2, 0]}
-          background={true}
-        /> */}
-        {/* <Perf /> */}
-        {/* <Environment path="/hero-image-nabula.webp" background={true} /> */}
-
-        <AdaptiveDpr pixelated />
-
-        <FarPlanets img={img} />
-        <InnerScene
-          images={images}
-          svgUrl={svgUrl}
-          section2Position={section2Position}
-          section2LookAtTarget={section2LookAtTarget}
-          initialFov={INITIAL_FOV}
-          img={img}
-        />
-        {/* <OrbitControls /> */}
+        <Suspense fallback={null}>
+          {/* LoadingManager is now headless and reusable */}
+          <LoadingManager
+            onProgress={handleProgress}
+            onLoadComplete={handleLoadComplete}
+          />
+          <Env />
+          <AdaptiveDpr pixelated />
+          <FarPlanets img={img} />
+          <InnerScene
+            images={images}
+            svgUrl={svgUrl}
+            section2Position={section2Position}
+            section2LookAtTarget={section2LookAtTarget}
+            initialFov={INITIAL_FOV}
+            img={img}
+          />
+        </Suspense>
         <EffectComposer>
           <Vignette eskil={false} offset={0.1} darkness={1.1} />
           <Bloom mipmapBlur luminanceThreshold={1} intensity={1} />

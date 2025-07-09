@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 
 // Component to handle the moon with color animation
@@ -7,22 +7,26 @@ export const AnimatedMoon = ({ position, rotation, scale, img }) => {
     const meshRef = useRef();
     const materialRef = useRef();
 
-    // Create refs for the texture loaders with updated blobby versions
-    const colorMapRef = useRef(
-        new THREE.TextureLoader().load(img.color, (texture) => {
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(1, 1);
-        })
-    );
+    // Memoize texture loading so it only happens once per prop change
+    const colorMap = useMemo(() => {
+        const texture = new THREE.TextureLoader().load(img.color, (t) => {
+            t.wrapS = t.wrapT = THREE.RepeatWrapping;
+            t.repeat.set(1, 1);
+        });
+        return texture;
+    }, [img.color]);
 
-    const normalMapRef = useRef(
-        new THREE.TextureLoader().load(img.normal, (texture) => {
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(1, 1);
-        })
-    );
+    const normalMap = useMemo(() => {
+        const texture = new THREE.TextureLoader().load(img.normal, (t) => {
+            t.wrapS = t.wrapT = THREE.RepeatWrapping;
+            t.repeat.set(1, 1);
+        });
+        return texture;
+    }, [img.normal]);
 
-    const displacementMapRef = useRef(new THREE.TextureLoader().load(img.height));
+    const displacementMap = useMemo(() => {
+        return new THREE.TextureLoader().load(img.height);
+    }, [img.height]);
 
     useFrame((state) => {
         if (materialRef.current) {
@@ -47,9 +51,9 @@ export const AnimatedMoon = ({ position, rotation, scale, img }) => {
                 ref={materialRef}
                 roughness={0.8}
                 metalness={0.2}
-                map={colorMapRef.current}
-                normalMap={normalMapRef.current}
-                displacementMap={displacementMapRef.current}
+                map={colorMap}
+                normalMap={normalMap}
+                displacementMap={displacementMap}
                 displacementScale={2}
                 displacementBias={0}
             />
