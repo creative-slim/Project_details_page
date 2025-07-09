@@ -16,6 +16,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import { Rig } from "./components/Rig.jsx";
 import { InnerScene } from "./components/InnerScene.jsx";
 import { FarPlanets } from "./components/FarPlanets.jsx";
+import Env from "./Env.jsx";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -80,13 +81,14 @@ const App = () => {
         camera={{ fov: INITIAL_FOV, position: [0, 0.8, 7.5] }}
         flat
       >
+        <Env />
         {/* <Environment preset="night" background={true} /> */}
         {/* <Environment files="/rogland_clear_night_4k.exr" background={true} /> */}
-        <Environment
+        {/* <Environment
           files="/sci-fi-nebula-space-planet_2K.exr"
           backgroundRotation={[0, Math.PI / 2, 0]}
           background={true}
-        />
+        /> */}
         {/* <Perf /> */}
         {/* <Environment path="/hero-image-nabula.webp" background={true} /> */}
 
@@ -101,7 +103,7 @@ const App = () => {
           initialFov={INITIAL_FOV}
           img={img}
         />
-        <OrbitControls />
+        {/* <OrbitControls /> */}
         <EffectComposer>
           <Vignette eskil={false} offset={0.1} darkness={1.1} />
           <Bloom mipmapBlur luminanceThreshold={1} intensity={1} />
