@@ -80,8 +80,16 @@ const App = () => {
         camera={{ fov: INITIAL_FOV, position: [0, 0.8, 7.5] }}
         flat
       >
-        <Environment preset="city" background={false} />
+        {/* <Environment preset="night" background={true} /> */}
+        {/* <Environment files="/rogland_clear_night_4k.exr" background={true} /> */}
+        <Environment
+          files="/sci-fi-nebula-space-planet_2K.exr"
+          backgroundRotation={[0, Math.PI / 2, 0]}
+          background={true}
+        />
         {/* <Perf /> */}
+        {/* <Environment path="/hero-image-nabula.webp" background={true} /> */}
+
         <AdaptiveDpr pixelated />
 
         <FarPlanets img={img} />
