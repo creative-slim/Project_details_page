@@ -32,6 +32,7 @@ export default function Env({ hueShift = 0, saturation = 0, brightness = 0 }) {
             <primitive object={backgroundTexture} attach="background" />
             <Environment
                 files={lightingTextureUrl}
+                environmentIntensity={0.3}
             />
         </>
     );
